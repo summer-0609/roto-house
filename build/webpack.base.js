@@ -1,9 +1,11 @@
-const webpack = require('webpack')
 const path = require('path')
 const config = require('./configs/options')
 
+const os = require('os')
 const HappyPack = require('happypack')
-const happyThreadPool = HappyPack.ThreadPool({ size: 5 })
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length }) // cpus核数
+
+const { VueLoaderPlugin } = require('vue-loader')
 
 const cssLoaders = require('./rules/cssLoaders')
 
@@ -14,24 +16,25 @@ function resolve (name) {
 function addDevClient (options) {
   if (options.mode === 'development') {
     Object.keys(options.entry).forEach(name => {
-      options.entry[name] = ['./build/plugins/devClient.js'].concat(options.entry[name])
+      options.entry[name] = ['webpack-hot-middleware/client?reload=true&noInfo=true'].concat(
+        options.entry[name]
+      )
     })
   }
   return options.entry
 }
 
-
 module.exports = (options) => {
-  const entry = addDevClient ({
-    entry:  {
-      app: [resolve('app/main.js')]
+  const entry = addDevClient({
+    entry: {
+      app: [resolve('src/main.js')]
     },
     mode: options.mode
   })
   return {
     entry: entry,
     output: {
-      publicPath:'/',
+      publicPath: '/',
       path: resolve(config.builtPath || 'dist'),
       filename: 'static/js/[name].[hash].js',
       chunkFilename: 'static/js/[name].[chunkhash].js'
@@ -41,30 +44,31 @@ module.exports = (options) => {
       extensions: ['.js', '.vue', '.json'],
       alias: {
         'vue$': 'vue/dist/vue.esm.js',
-        'vue-freedom': path.resolve(__dirname, '../'),
-        '@': resolve('examples'),
+        '@components': resolve('src/components'),
+        '@': resolve('examples')
       }
     },
-    // externals: {
-    //   vue: 'Vue',
-    //   vuex: 'Vuex',
-    //   'vue-router': 'VueRouter'
-    // },
+    externals: {
+      vue: 'Vue',
+      vuex: 'Vuex',
+      'vue-router': 'VueRouter'
+    },
     module: {
       rules: [
         {
           test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
+          loader: 'happypack/loader',
           enforce: 'pre',
           include: [resolve('app')],
           options: {
+            id: 'eslint',
             formatter: require('eslint-friendly-formatter')
           }
         },
         {
           test: /(\.jsx|\.js)$/,
           // use: {
-          //   loader: "babel-loader"
+          //   loader: 'babel-loader'
           // },
           use: ['happypack/loader?id=babel'],
           exclude: /node_modules/
@@ -106,9 +110,15 @@ module.exports = (options) => {
       ]
     },
     plugins: [
+      new VueLoaderPlugin(),
+      new HappyPack({
+        id: 'eslint',
+        loaders: ['eslint-loader'],
+        threadPool: happyThreadPool
+      }),
       new HappyPack({
         id: 'babel',
-        loaders: ['babel-loader?cacheDirectory'],
+        loaders: ['babel-loader'],
         threadPool: happyThreadPool
       })
     ]

@@ -15,7 +15,6 @@ const config = require('./configs/options')
 
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const { VueLoaderPlugin } = require('vue-loader')
 const proxyTable = require('./configs/proxy')
 const useExpressProxy = require('./plugins/useExpressProxy')
 
@@ -26,12 +25,11 @@ const compiler = webpack(merge(baseConfig({ mode: 'development' }), {
   mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   plugins: [
-    new VueLoaderPlugin(),
     new FriendlyErrorsWebpackPlugin(),
     new webpack.EnvironmentPlugin(appEnvs),
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
-      template: resolve('index.html'),
+      template: resolve('./public/index.html'),
       filename: 'index.html'
     })
   ],
@@ -74,7 +72,7 @@ app.use(hotMiddleware)
 useExpressProxy(app, proxyTable)
 
 devMiddleware.waitUntilValid(() => {
-  console.log(chalk.yellow(`I am ready. open http://localhost:${config.port || 3000} to see me.`))
+  console.log(chalk.yellow(`I am ready. open http://localhost:${ config.port || 3000 } to see me.`))
 })
 
 app.listen(config.port || 3000)

@@ -6,14 +6,15 @@ const chalk = require('chalk')
 const merge = require('webpack-merge')
 
 const baseConfig = require('./webpack.base.js')
-const { VueLoaderPlugin } = require('vue-loader')
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-const UgifyJsPlugin = require('uglifyjs-webpack-plugin')
+// const UgifyJsPlugin = require('uglifyjs-webpack-plugin')
+const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin')
 
 const config = require('./configs/options')
 const appEnvs = require('./configs/appEnvs')
@@ -21,7 +22,7 @@ const appEnvs = require('./configs/appEnvs')
 const compiler = webpack(merge(baseConfig({ mode: 'production' }), {
   mode: 'production',
   output: {
-    publicPath:'./',
+    publicPath: './'
   },
   performance: {
     hints: false
@@ -29,34 +30,28 @@ const compiler = webpack(merge(baseConfig({ mode: 'production' }), {
   plugins: [
     new webpack.HashedModuleIdsPlugin(),
     new webpack.EnvironmentPlugin(appEnvs),
-    new VueLoaderPlugin(),
+    new webpack.SourceMapDevToolPlugin({
+      test: /\.js$/,
+      filename: 'sourcemap/[name].[chunkhash].map',
+      append: false
+    }),
     new CleanWebpackPlugin([`${config.builtPath || 'dist'}/*`], {
       root: path.resolve(__dirname, '..')
     }),
     new HtmlWebpackPlugin({
-      template: resolve('index.html'),
+      template: resolve('./public/index.html'),
       filename: 'index.html',
-      chunks: ['app', 'vendors', 'mainifest']
+      chunks: ['app', 'vendors', 'mainifest'],
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+      }
     }),
     new MiniCssExtractPlugin({
       filename: 'static/css/[name].[contenthash].css'
       // chunkFilename: 'static/css/[id].[contenthash].css'
-    }),
-    new OptimizeCSSPlugin({
-      cssProcessorOptions: {
-        safe: true,
-        discardComments: {
-          removeAll: true
-        },
-        autoprefixer: false
-      },
-      canPrint: true
     })
-    // new webpack.SourceMapDevToolPlugin({
-    //   test: /\.js$/,
-    //   filename: 'sourcemap/[name].[chunkhash].map',
-    //   append: false
-    // })
   ],
   optimization: {
     runtimeChunk: {
@@ -81,16 +76,44 @@ const compiler = webpack(merge(baseConfig({ mode: 'production' }), {
       }
     },
     minimizer: [
-      new UgifyJsPlugin({
-        cache: true,
-        parallel: true,
-        uglifyOptions: {
-          warnings: false,
-          console: false,
-          ie8: true
+      new ParallelUglifyPlugin({
+        uglifyJS: {
+          output: {
+            beautify: false,
+            comments: false
+          },
+          compress: {
+            warnings: false,
+            drop_console: true,
+            collapse_vars: true,
+            reduce_vars: true
+          }
         },
-        sourceMap: true
+        cache: true, // 开启缓存
+        parallel: true, // 平行压缩
+        sourceMap: true // set to true if you want JS source maps
+      }),
+      new OptimizeCssAssetsPlugin({
+        safe: true,
+        discardComments: {
+          removeAll: true
+        },
+        autoprefixer: false,
+        assetNameRegExp: /\.optimize\.css$/g,
+        cssProcessor: require('cssnano'), // css 压缩优化器
+        cssProcessorOptions: { safe: true, discardComments: { removeAll: true } }, // 去除所有注释
+        canPrint: true
       })
+      // new UgifyJsPlugin({
+      //   cache: true,
+      //   parallel: true,
+      //   uglifyOptions: {
+      //     warnings: false,
+      //     console: false,
+      //     ie8: true
+      //   },
+      //   sourceMap: true
+      // }),
     ]
   }
 }))
@@ -112,7 +135,7 @@ compiler.run((err, stats) => {
     chunkModules: false
   }) + '\n\n')
 
-  console.log(chalk.cyan('  Build complete.\n'))
+  console.log(chalk.cyan('  Build complete..\n'))
   console.log(chalk.yellow(
     '  Tip: built files are meant to be served over an HTTP server.\n' +
     '  Opening index.html over file:// won\'t work.\n'
