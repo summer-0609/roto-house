@@ -16,18 +16,18 @@ function resolve (name) {
 function addDevClient (options) {
   if (options.mode === 'development') {
     Object.keys(options.entry).forEach(name => {
-      options.entry[name] = ['webpack-hot-middleware/client?reload=true&noInfo=true'].concat(
-        options.entry[name]
-      )
+      options.entry[name] = [
+        'webpack-hot-middleware/client?reload=true&noInfo=true'
+      ].concat(options.entry[name])
     })
   }
   return options.entry
 }
 
-module.exports = (options) => {
+module.exports = options => {
   const entry = addDevClient({
     entry: {
-      app: [resolve('src/main.js')]
+      app: [resolve('src/main.ts')]
     },
     mode: options.mode
   })
@@ -41,11 +41,11 @@ module.exports = (options) => {
     },
     resolve: {
       modules: [resolve('node_modules'), resolve('src')],
-      extensions: ['.js', '.vue', '.json'],
+      extensions: ['.tsx', '.ts', '.js', '.vue', '.json'],
       alias: {
-        'vue$': 'vue/dist/vue.esm.js',
+        vue$: 'vue/dist/vue.esm.js',
         '@components': resolve('src/components'),
-        '@': resolve('examples')
+        '@': resolve('src')
       }
     },
     externals: {
@@ -72,6 +72,17 @@ module.exports = (options) => {
           // },
           use: ['happypack/loader?id=babel'],
           exclude: /node_modules/
+        },
+        {
+          test: /(\.tsx|\.ts)$/,
+          exclude: /node_modules/,
+          use: [
+            'babel-loader',
+            {
+              loader: 'ts-loader',
+              options: { appendTsxSuffixTo: [/\.vue$/] }
+            }
+          ]
         },
         {
           test: /\.vue$/,
