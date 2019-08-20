@@ -74,7 +74,19 @@ module.exports = options => {
           exclude: /node_modules/
         },
         {
-          test: /(\.tsx|\.ts)$/,
+          test: /(\.tsx)$/,
+          exclude: /node_modules/,
+          use: [
+            'babel-loader',
+            'vue-jsx-hot-loader',
+            {
+              loader: 'ts-loader',
+              options: { appendTsxSuffixTo: [/\.vue$/] }
+            }
+          ]
+        },
+        {
+          test: /(\.ts)$/,
           exclude: /node_modules/,
           use: [
             'babel-loader',
