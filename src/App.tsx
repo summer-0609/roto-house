@@ -1,11 +1,11 @@
 import { Vue, Component } from 'vue-property-decorator'
-
+import { CreateElement } from 'vue'
 @Component
 export default class extends Vue {
-  render() {
+  render(h: CreateElement) {
     return (
       <div id="app">
-        {/* <router-view/> */}
+        <router-view/>
       </div>
     )
   }
