@@ -1,4 +1,17 @@
-<template>
+import { Vue, Component } from 'vue-property-decorator'
+
+@Component
+export default class extends Vue {
+  render() {
+    return (
+      <div id="app">
+        {/* <router-view/> */}
+      </div>
+    )
+  }
+}
+
+{/* <template>
   <div id="app">
     <router-view/>
   </div>
@@ -31,4 +44,4 @@ html.has-full body {
   text-align: center;
   color: #2c3e50;
 }
-</style>
+</style> */}
