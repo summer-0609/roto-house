@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'
 import { CITY, TOKEN } from '../utils/token'
 import { SignInMart } from '@roto/bridge'
 import { Message } from '@roto/component-vact'
@@ -71,4 +71,3 @@ export async function toc (config) {
 
   return toc_instance(config)
 }
- 

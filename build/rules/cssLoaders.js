@@ -29,7 +29,6 @@ module.exports = function (options) {
         loaders.push(handleLoader(item))
       })
     }
-
     if (options.extract) {
       return [MiniCssExtractPlugin.loader].concat(loaders)
     } else {
@@ -62,7 +61,6 @@ module.exports = function (options) {
       }
     ]
   }
-
   return [
     {
       test: /\.css$/,
