@@ -8,6 +8,8 @@ const chalk = require('chalk')
 const webpackMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 
+const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 
 const baseConfig = require('./webpack.base')
@@ -25,6 +27,7 @@ const compiler = webpack(merge(baseConfig({ mode: 'development' }), {
   mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   plugins: [
+    new ProgressBarPlugin(),
     new FriendlyErrorsWebpackPlugin(),
     new webpack.EnvironmentPlugin(appEnvs),
     new webpack.HotModuleReplacementPlugin(),

@@ -5,16 +5,20 @@ module.exports = {
       {
         modules: false,
         targets: {
-          'browsers': ['> 1%', 'last 2 versions', 'not ie <= 8']
+          browsers: ['> 1%', 'last 2 versions', 'not ie <= 8']
         }
       }
-    ]
+    ],
+    '@vue/babel-preset-jsx'
   ],
-  plugins: ['@babel/plugin-transform-runtime', 'transform-vue-jsx']
-  // env: {
-  //   'test': {
-  //     'presets': ['env', 'stage-2'],
-  //     'plugins': ['@vue/babel-plugin-transform-vue-jsx', '@babel/plugin-transform-runtime']
-  //   }
-  // }
+  plugins: [
+    '@babel/plugin-transform-runtime'
+  ],
+  comments: false,
+  env: {
+    test: {
+      presets: ['@babel/preset-env'],
+      plugins: ['babel-plugin-dynamic-import-node']
+    }
+  }
 }
