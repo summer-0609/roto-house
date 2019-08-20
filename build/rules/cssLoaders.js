@@ -1,5 +1,4 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const path = require('path')
 
 module.exports = function (options) {
   options = options || {}
@@ -8,6 +7,7 @@ module.exports = function (options) {
     loader: 'css-loader',
     options: {
       minimize: !!(options.mode === 'production'),
+      modules: true,
       sourceMap: options.sourceMap
     }
   }
@@ -17,7 +17,6 @@ module.exports = function (options) {
 
   function generateLoaders (loader) {
     var loaders = [cssLoader, postcssLoader]
-
     if (loader) {
       if (
         typeof loader === 'string' ||
@@ -34,7 +33,7 @@ module.exports = function (options) {
     if (options.extract) {
       return [MiniCssExtractPlugin.loader].concat(loaders)
     } else {
-      return ['vue-style-loader'].concat(loaders)
+      return ['style-loader'].concat(loaders)
     }
   }
 
@@ -49,10 +48,6 @@ module.exports = function (options) {
     } else if (typeof loader === 'object' && loader.constructor === Object) {
       return loader
     }
-  }
-
-  function resolveResouce(name) {
-    return path.resolve(__dirname, '../' + name);
   }
 
   function getScssConfig () {

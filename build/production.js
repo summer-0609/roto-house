@@ -104,16 +104,6 @@ const compiler = webpack(merge(baseConfig({ mode: 'production' }), {
         cssProcessorOptions: { safe: true, discardComments: { removeAll: true } }, // 去除所有注释
         canPrint: true
       })
-      // new UgifyJsPlugin({
-      //   cache: true,
-      //   parallel: true,
-      //   uglifyOptions: {
-      //     warnings: false,
-      //     console: false,
-      //     ie8: true
-      //   },
-      //   sourceMap: true
-      // }),
     ]
   }
 }))

@@ -12,10 +12,10 @@ module.exports = {
   extends: 'standard',
   // required to lint *.vue files
   plugins: [
-    'html'
+    'html', 'typescript'
   ],
   // add your custom rules here
-  'rules': {
+  rules: {
     // allow paren-less arrow functions
     'arrow-parens': 0,
     // allow async-await

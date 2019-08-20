@@ -1,11 +1,13 @@
 const path = require('path')
 const config = require('./configs/options')
 
+const ProgressBarPlugin = require('progress-bar-webpack-plugin')
+
 const os = require('os')
 const HappyPack = require('happypack')
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length }) // cpus核数
 
-const { VueLoaderPlugin } = require('vue-loader')
+// const { VueLoaderPlugin } = require('vue-loader')
 
 const cssLoaders = require('./rules/cssLoaders')
 
@@ -56,49 +58,19 @@ module.exports = options => {
     module: {
       rules: [
         {
-          test: /\.(js|vue)$/,
-          loader: 'happypack/loader',
-          enforce: 'pre',
-          include: [resolve('app')],
-          options: {
-            id: 'eslint',
-            formatter: require('eslint-friendly-formatter')
-          }
-        },
-        {
           test: /(\.jsx|\.js)$/,
-          // use: {
-          //   loader: 'babel-loader'
-          // },
-          use: ['happypack/loader?id=babel'],
+          use: ['happypack/loader?id=jsloader'],
           exclude: /node_modules/
         },
         {
           test: /(\.tsx)$/,
           exclude: /node_modules/,
-          use: [
-            'babel-loader',
-            'vue-jsx-hot-loader',
-            {
-              loader: 'ts-loader',
-              options: { appendTsxSuffixTo: [/\.vue$/] }
-            }
-          ]
+          use: ['happypack/loader?id=tsxloader']
         },
         {
           test: /(\.ts)$/,
           exclude: /node_modules/,
-          use: [
-            'babel-loader',
-            {
-              loader: 'ts-loader',
-              options: { appendTsxSuffixTo: [/\.vue$/] }
-            }
-          ]
-        },
-        {
-          test: /\.vue$/,
-          loader: 'vue-loader'
+          use: ['happypack/loader?id=tsloader']
         },
         ...cssLoaders({
           mode: options.mode,
@@ -133,15 +105,44 @@ module.exports = options => {
       ]
     },
     plugins: [
-      new VueLoaderPlugin(),
+      new ProgressBarPlugin(),
       new HappyPack({
-        id: 'eslint',
-        loaders: ['eslint-loader'],
+        id: 'tsxloader',
+        loaders: [
+          'babel-loader',
+          'vue-jsx-hot-loader',
+          {
+            loader: 'tslint-loader',
+            options: {
+              formatter: 'codeFrame',
+              enforce: 'pre',
+              emitErrors: true,
+              typeCheck: true,
+              fix: false
+            }
+          }
+        ],
         threadPool: happyThreadPool
       }),
       new HappyPack({
-        id: 'babel',
-        loaders: ['babel-loader'],
+        id: 'tsloader',
+        loaders: [
+          {
+            loader: 'tslint-loader',
+            options: {
+              formatter: 'codeFrame',
+              enforce: 'pre',
+              emitErrors: true,
+              typeCheck: true,
+              fix: false
+            }
+          }
+        ],
+        threadPool: happyThreadPool
+      }),
+      new HappyPack({
+        id: 'jsloader',
+        loaders: ['babel-loader', 'eslint-loader'],
         threadPool: happyThreadPool
       })
     ]
